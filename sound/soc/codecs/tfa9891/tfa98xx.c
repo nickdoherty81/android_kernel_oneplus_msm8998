@@ -32,8 +32,6 @@
 /*zhiguang.su@MultiMedia.AudioDrv, 2014-4-14, add for l21 power*/
 #include <linux/regulator/consumer.h>
 
-/*zhiguang.su@MultiMedia.AudioDrv, 2015-11-09, add for debug*/
-#include <sound/sounddebug.h>
 
 #define I2C_RETRIES 50
 #define I2C_RETRY_DELAY 5 /* ms */

@@ -522,9 +522,8 @@ static int msm_snd_enable_codec_ext_clk(struct snd_soc_codec *codec,
 					int enable, bool dapm);
 static int msm_wsa881x_init(struct snd_soc_component *component);
 
-#ifdef CONFIG_VENDOR_ONEPLUS
+/*zhiguang.su@MultiMedia.AudioDrv , 2017/6/6, read project string*/
 int op_project_17801;
-#endif
 
 /*
  * Need to report LINEIN
@@ -538,15 +537,9 @@ static struct wcd_mbhc_config wcd_mbhc_cfg = {
 	.swap_gnd_mic = NULL,
 	.hs_ext_micbias = true,
 	.key_code[0] = KEY_MEDIA,
-#ifdef CONFIG_VENDOR_ONEPLUS
 	.key_code[1] = KEY_VOLUMEUP,
 	.key_code[2] = KEY_VOLUMEDOWN,
 	.key_code[3] = 0,
-#else
-	.key_code[1] = KEY_VOICECOMMAND,
-	.key_code[2] = KEY_VOLUMEUP,
-	.key_code[3] = KEY_VOLUMEDOWN,
-#endif
 	.key_code[4] = 0,
 	.key_code[5] = 0,
 	.key_code[6] = 0,
@@ -3045,7 +3038,7 @@ static const struct snd_soc_dapm_widget msm_dapm_widgets[] = {
 	SND_SOC_DAPM_MIC("Digital Mic5", NULL),
 };
 
-#ifdef CONFIG_VENDOR_ONEPLUS
+/*zhiguang.su@MultiMedia.AudioDrv , 2017/06/06, add for 17801 project*/
 static const struct snd_soc_dapm_widget msm_dapm_widgets_17801[] = {
 
 	SND_SOC_DAPM_SUPPLY("MCLK",  SND_SOC_NOPM, 0, 0,
@@ -3077,7 +3070,6 @@ static const struct snd_soc_dapm_widget msm_dapm_widgets_17801[] = {
 	SND_SOC_DAPM_MIC("Digital Mic4", NULL),
 	SND_SOC_DAPM_MIC("Digital Mic5", NULL),
 };
-#endif
 
 static inline int param_is_mask(int p)
 {
@@ -3715,7 +3707,7 @@ static int msm_audrx_init(struct snd_soc_pcm_runtime *rtd)
 		return ret;
 	}
 
-#ifdef CONFIG_VENDOR_ONEPLUS
+/*zhiguang.su@MultiMedia.AudioDrv , 2017/05/27, add for analog mic*/
 	if (op_project_17801) {
 		snd_soc_dapm_new_controls(dapm, msm_dapm_widgets_17801,
 					ARRAY_SIZE(msm_dapm_widgets_17801));
@@ -3723,10 +3715,6 @@ static int msm_audrx_init(struct snd_soc_pcm_runtime *rtd)
 		snd_soc_dapm_new_controls(dapm, msm_dapm_widgets,
 					ARRAY_SIZE(msm_dapm_widgets));
 	}
-#else
-	snd_soc_dapm_new_controls(dapm, msm_dapm_widgets,
-				ARRAY_SIZE(msm_dapm_widgets));
-#endif
 
 	if (!strcmp(dev_name(codec_dai->dev), "tasha_codec"))
 		snd_soc_dapm_add_routes(dapm, wcd_audio_paths_tasha,
@@ -3745,12 +3733,11 @@ static int msm_audrx_init(struct snd_soc_pcm_runtime *rtd)
 	snd_soc_dapm_ignore_suspend(dapm, "Digital Mic3");
 	snd_soc_dapm_ignore_suspend(dapm, "Digital Mic4");
 	snd_soc_dapm_ignore_suspend(dapm, "Digital Mic5");
-#ifdef CONFIG_VENDOR_ONEPLUS
+/*zhiguang.su@MultiMedia.AudioDrv , 2017/05/27, add for analog mic*/
 	if (op_project_17801) {
 		snd_soc_dapm_ignore_suspend(dapm, "Analog Mic3");
 		snd_soc_dapm_ignore_suspend(dapm, "Analog Mic4");
 	}
-#endif
 	snd_soc_dapm_ignore_suspend(dapm, "Analog Mic5");
 	snd_soc_dapm_ignore_suspend(dapm, "Analog Mic6");
 	snd_soc_dapm_ignore_suspend(dapm, "MADINPUT");
@@ -3863,13 +3850,6 @@ static int msm_audrx_init(struct snd_soc_pcm_runtime *rtd)
 		pdata->codec_root = entry;
 		tavil_codec_info_create_codec_entry(pdata->codec_root, codec);
 	} else {
-		if (rtd->card->num_aux_devs && rtd_aux && rtd_aux->component)
-			if (!strcmp(rtd_aux->component->name, WSA8810_NAME_1) ||
-			    !strcmp(rtd_aux->component->name, WSA8810_NAME_2)) {
-				tasha_set_spkr_mode(rtd->codec, SPKR_MODE_1);
-				tasha_set_spkr_gain_offset(rtd->codec,
-							RX_GAIN_OFFSET_M1P5_DB);
-		}
 		card = rtd->card->snd_card;
 		entry = snd_register_module_info(card->module, "codecs",
 						 card->proc_root);
@@ -3913,11 +3893,8 @@ static void *def_tasha_mbhc_cal(void)
 		return NULL;
 
 #define S(X, Y) ((WCD_MBHC_CAL_PLUG_TYPE_PTR(tasha_wcd_cal)->X) = (Y))
-#ifdef CONFIG_VENDOR_ONEPLUS
 	S(v_hs_max, 1700);
-#else
-	S(v_hs_max, 1600);
-#endif
+
 #undef S
 #define S(X, Y) ((WCD_MBHC_CAL_BTN_DET_PTR(tasha_wcd_cal)->X) = (Y))
 	S(num_btn, WCD_MBHC_DEF_BUTTONS);
@@ -3926,17 +3903,10 @@ static void *def_tasha_mbhc_cal(void)
 	btn_cfg = WCD_MBHC_CAL_BTN_DET_PTR(tasha_wcd_cal);
 	btn_high = ((void *)&btn_cfg->_v_btn_low) +
 		(sizeof(btn_cfg->_v_btn_low[0]) * btn_cfg->num_btn);
-
 	btn_high[0] = 75;
-#ifdef CONFIG_VENDOR_ONEPLUS
 	btn_high[1] = 213;
 	btn_high[2] = 450;
 	btn_high[3] = 470;
-#else
-	btn_high[1] = 150;
-	btn_high[2] = 237;
-	btn_high[3] = 500;
-#endif
 	btn_high[4] = 500;
 	btn_high[5] = 500;
 	btn_high[6] = 500;
@@ -4394,13 +4364,8 @@ static int msm_set_pinctrl(struct msm_pinctrl_info *pinctrl_info,
 	}
 
 	if (pinctrl_info->pinctrl == NULL) {
-#ifdef CONFIG_VENDOR_ONEPLUS
 		pr_debug("%s: pinctrl_info->pinctrl is NULL\n", __func__);
 		/*ret = -EINVAL;*/
-#else
-		pr_err("%s: pinctrl_info->pinctrl is NULL\n", __func__);
-		ret = -EINVAL;
-#endif
 		goto err;
 	}
 
@@ -6577,13 +6542,8 @@ static struct snd_soc_dai_link msm_mi2s_be_dai_links[] = {
 		.stream_name = "Quaternary MI2S Playback",
 		.cpu_dai_name = "msm-dai-q6-mi2s.3",
 		.platform_name = "msm-pcm-routing",
-#ifdef CONFIG_VENDOR_ONEPLUS
 		.codec_name = "tfa98xx.9-0036",
 		.codec_dai_name = "tfa98xx_codec-9-36",
-#else
-		.codec_name = "msm-stub-codec.1",
-		.codec_dai_name = "msm-stub-rx",
-#endif
 		.no_pcm = 1,
 		.dpcm_playback = 1,
 		.be_id = MSM_BACKEND_DAI_QUATERNARY_MI2S_RX,
@@ -6961,7 +6921,7 @@ static int msm_audrx_stub_init(struct snd_soc_pcm_runtime *rtd)
 		return ret;
 	}
 
-#ifdef CONFIG_VENDOR_ONEPLUS
+/*zhiguang.su@MultiMedia.AudioDrv , 2017/05/27, add for analog mic*/
 	if (op_project_17801) {
 		snd_soc_dapm_new_controls(dapm, msm_dapm_widgets_17801,
 					ARRAY_SIZE(msm_dapm_widgets_17801));
@@ -6969,11 +6929,6 @@ static int msm_audrx_stub_init(struct snd_soc_pcm_runtime *rtd)
 		snd_soc_dapm_new_controls(dapm, msm_dapm_widgets,
 					ARRAY_SIZE(msm_dapm_widgets));
 	}
-#else
-	snd_soc_dapm_new_controls(dapm, msm_dapm_widgets,
-				ARRAY_SIZE(msm_dapm_widgets));
-#endif
-
 	return 0;
 }
 
@@ -7305,7 +7260,8 @@ static int msm_init_wsa_dev(struct platform_device *pdev,
 	char *dev_name_str = NULL;
 	int found = 0;
 	int ret = 0;
-
+/*wangdongdong@MultiMediaService,add to avoid wsa init*/
+	return ret;
 	/* Get maximum WSA device count for this platform */
 	ret = of_property_read_u32(pdev->dev.of_node,
 				   "qcom,wsa-max-devs", &wsa_max_devs);
@@ -7571,14 +7527,13 @@ static int msm_asoc_machine_probe(struct platform_device *pdev)
 	platform_set_drvdata(pdev, card);
 	snd_soc_card_set_drvdata(card, pdata);
 
-#ifdef CONFIG_VENDOR_ONEPLUS
+/*zhiguang.su@MultiMedia.AudioDrv , 2017/6/6, read project string*/
 	ret = of_property_read_bool(card->dev->of_node, "op,project_17801");
 	if (ret)
 		op_project_17801 = 0;
 	else
 		op_project_17801 = 1;
 	pr_err("%s project name: %d", __func__, op_project_17801);
-#endif
 
 	ret = snd_soc_of_parse_card_name(card, "qcom,model");
 	if (ret) {

@@ -26,7 +26,6 @@ enum FP_MODE{
 #define GF_NAV_INPUT_RIGHT		KEY_RIGHT
 #define GF_NAV_INPUT_CLICK		KEY_VOLUMEDOWN
 #define GF_NAV_INPUT_DOUBLE_CLICK	KEY_VOLUMEUP
-/*liuyan 2018/8/3 change it*/
 #define GF_NAV_INPUT_LONG_PRESS BTN_B
 #define GF_NAV_INPUT_F2 KEY_F2
 #define GF_NAV_INPUT_HEAVY		KEY_CHAT
@@ -51,7 +50,6 @@ typedef enum gf_nav_event {
 	GF_NAV_HEAVY,
 	GF_NAV_LONG_PRESS,
 	GF_NAV_DOUBLE_CLICK,
-/*liuyan 2017/8/7 add for reprot f2*/
 	GF_NAV_F2,
 } gf_nav_event_t;
 #endif
@@ -141,15 +139,12 @@ struct gf_dev {
 	struct notifier_block notifier;
 	char device_available;
 	char fb_black;
-	/*liuyan 2017/7/28 add*/
 	struct pinctrl         *gf_pinctrl;
 	struct pinctrl_state   *gpio_state_enable;
 	struct pinctrl_state   *gpio_state_disable;
 	signed enable_gpio;
 	int project_version;
-	int proximity_state; /* 0:far 1:near */
 };
-/*liuyan 2017/7/28 add*/
 int gf_pinctrl_init(struct gf_dev* gf_dev);
 int gf_parse_dts(struct gf_dev* gf_dev);
 void gf_cleanup(struct gf_dev *gf_dev);

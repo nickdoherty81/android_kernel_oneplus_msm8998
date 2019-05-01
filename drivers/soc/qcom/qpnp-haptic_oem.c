@@ -336,18 +336,15 @@ struct qpnp_hap {
 	bool				sup_brake_pat;
 	bool				correct_lra_drive_freq;
 	bool				misc_trim_error_rc19p2_clk_reg_present;
-#ifdef CONFIG_VENDOR_ONEPLUS /*wulaibin 2016-12-13 add for show vibrator resonant frequency*/
+/*wulaibin 2016-12-13 add for show vibrator resonant frequency*/
 	int                 resonant_frequency;
 	int                 enable_time;
-#endif
 };
 
 static struct qpnp_hap *ghap;
 /*wulaibin  2015-11-18 add begin for optimizing the response speed of the
 vibrator*/
-#ifdef CONFIG_VENDOR_ONEPLUS
 static struct workqueue_struct *vibqueue;
-#endif //CONFIG_VENDOR_ONEPLUS
 /*wulaibin  2015-11-18 add end for optimizing the response speed of the
 vibrator*/
 
@@ -1025,7 +1022,7 @@ static ssize_t qpnp_hap_wf_s7_store(struct device *dev,
 	return qpnp_hap_wf_samp_store(dev, buf, count, 7);
 }
 
-#ifdef CONFIG_VENDOR_ONEPLUS /*wulaibin 2016-12-13 add for show vibrator resonant frequency*/
+/*wulaibin 2016-12-13 add for show vibrator resonant frequency*/
 static ssize_t qpnp_hap_rf_hz_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
@@ -1101,7 +1098,6 @@ static ssize_t qpnp_hap_vmax_store(struct device *dev,
 
     return count;
 }
-#endif /*CONFIG_VENDOR_ONEPLUS*/
 
 static ssize_t qpnp_hap_vmax_default(struct device *dev,
 		struct device_attribute *attr, char *buf)
@@ -1432,7 +1428,7 @@ static ssize_t qpnp_hap_ramp_test_data_show(struct device *dev,
 
 /* sysfs attributes */
 static struct device_attribute qpnp_hap_attrs[] = {
-#ifdef CONFIG_VENDOR_ONEPLUS /*wulaibin 2016-12-13 add for show vibrator resonant frequency*/
+/*wulaibin 2016-12-13 add for show vibrator resonant frequency*/
 	__ATTR(rf_hz, (S_IRUGO | S_IWUSR | S_IWGRP),
 			qpnp_hap_rf_hz_show,
 			qpnp_hap_rf_hz_store),
@@ -1440,7 +1436,6 @@ static struct device_attribute qpnp_hap_attrs[] = {
 	__ATTR(vtg_default, S_IRUGO, qpnp_hap_vmax_default, NULL),
 	__ATTR(vtg_max, S_IRUGO, qpnp_hap_vmax_max, NULL),
 	__ATTR(vtg_min, S_IRUGO, qpnp_hap_vmax_min, NULL),
-#endif /*CONFIG_VENDOR_ONEPLUS*/
 	__ATTR(wf_s0, 0664, qpnp_hap_wf_s0_show, qpnp_hap_wf_s0_store),
 	__ATTR(wf_s1, 0664, qpnp_hap_wf_s1_show, qpnp_hap_wf_s1_store),
 	__ATTR(wf_s2, 0664, qpnp_hap_wf_s2_show, qpnp_hap_wf_s2_store),
@@ -1713,14 +1708,9 @@ static void qpnp_hap_td_enable(struct timed_output_dev *dev, int value)
 		hap->state = 1;
 		hap->enable_time = value;
 	}
-	#ifndef CONFIG_VENDOR_ONEPLUS
-	mutex_unlock(&hap->lock);
-	schedule_work(&hap->work);
-	#else //#ifdef CONFIG_VENDOR_ONEPLUS
 	queue_work(vibqueue,&hap->work);
 	msleep(1);
 	mutex_unlock(&hap->lock);
-	#endif //CONFIG_VENDOR_ONEPLUS
 	/* shankai 2015-07-7 modify end for optimizing the response speed of the vibrator*/
 	//schedule_work(&hap->work); wulaibin remove it 2017-02-22 for vibrete time nonuniform
 }
@@ -2395,9 +2385,7 @@ static int qpnp_haptic_probe(struct platform_device *pdev)
 	mutex_init(&hap->lock);
 	mutex_init(&hap->wf_lock);
 
-        #ifdef CONFIG_VENDOR_ONEPLUS
 	vibqueue = create_singlethread_workqueue("vibthread");
-	#endif //CONFIG_VENDOR_ONEPLUS
 
 	INIT_WORK(&hap->work, qpnp_hap_worker);
 	INIT_DELAYED_WORK(&hap->sc_work, qpnp_handle_sc_irq);

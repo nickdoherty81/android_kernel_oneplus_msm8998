@@ -24,8 +24,6 @@
 #include "tfa_dsp_fw.h"
 /* TODO: remove genregs usage? */
 #include "tfa98xx_genregs_N1C.h"
-/*zhiguang.su@MultiMedia.AudioDrv, 2015-11-09, add for debug*/
-#include <sound/sounddebug.h>
 /* handle macro for bitfield */
 #define TFA_MK_BF(reg, pos, len) ((reg<<8)|(pos<<4)|(len-1))
 
@@ -2562,7 +2560,7 @@ enum Tfa98xx_Error tfaRunSpeakerCalibration(Tfa98xx_handle_t handle, int profile
 	enum Tfa98xx_Error err = Tfa98xx_Error_Ok;
 	int calibrateDone, spkr_count = 0;
 	/* Avoid warning in user-space */
-	profile = (int)profile;
+	profile=profile;
 
 #ifdef __KERNEL__ /* Necessary otherwise we are thrown out of operating mode in kernel (because of internal clock) */
 	if((strstr(tfaContProfileName(handle, profile), ".cal") == NULL) && (tfa98xx_dev_family(handle) == 2))

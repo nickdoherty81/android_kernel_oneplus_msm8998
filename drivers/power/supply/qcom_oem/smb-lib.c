@@ -64,7 +64,7 @@ extern void mcu_en_gpio_set(int value);
 extern void usb_sw_gpio_set(int value);
 extern void set_mcu_en_gpio_value(int value);
 static void op_battery_temp_region_set(struct smb_charger *chg,
-		temp_region_type batt_temp_region);
+		enum temp_region_type batt_temp_region);
 static void set_usb_switch(struct smb_charger *chg, bool enable);
 static void op_handle_usb_removal(struct smb_charger *chg);
 static bool get_prop_fast_switch_to_normal(struct smb_charger *chg);
@@ -75,7 +75,7 @@ static int get_prop_batt_voltage_now(struct smb_charger *chg);
 static int set_property_on_fg(struct smb_charger *chg,
 		enum power_supply_property prop, int val);
 static int set_dash_charger_present(int status);
-static temp_region_type
+static enum temp_region_type
 		op_battery_temp_region_get(struct smb_charger *chg);
 static int get_prop_fg_capacity(struct smb_charger *chg);
 static int get_prop_fg_current_now(struct smb_charger *chg);
@@ -4799,7 +4799,7 @@ static enum batt_status_type op_battery_status_get(struct smb_charger *chg)
 	return chg->battery_status;
 }
 
-static temp_region_type op_battery_temp_region_get(struct smb_charger *chg)
+static enum temp_region_type op_battery_temp_region_get(struct smb_charger *chg)
 {
 	return chg->mBattTempRegion;
 }
@@ -4819,7 +4819,7 @@ static void op_battery_status_set(struct smb_charger *chg,
 }
 
 static void op_battery_temp_region_set(struct smb_charger *chg,
-		temp_region_type batt_temp_region)
+		enum temp_region_type batt_temp_region)
 {
 	chg->mBattTempRegion = batt_temp_region;
 	pr_err("set temp_region=%d\n", chg->mBattTempRegion);
@@ -5235,7 +5235,7 @@ static int get_prop_fg_voltage_now(struct smb_charger *chg)
 int get_prop_batt_status(struct smb_charger *chg)
 {
 	int capacity, batt_status, rc;
-	temp_region_type temp_region;
+	enum temp_region_type temp_region;
 	union power_supply_propval pval = {0, };
 	temp_region = op_battery_temp_region_get(chg);
 	capacity = get_prop_batt_capacity(chg);
@@ -5292,7 +5292,7 @@ void set_chg_ibat_vbat_max(struct smb_charger *chg, int ibat, int vfloat )
 /* Tbatt < -3C */
 static int handle_batt_temp_cold(struct smb_charger *chg)
 {
-	temp_region_type temp_region;
+	enum temp_region_type temp_region;
 
 	temp_region = op_battery_temp_region_get(chg);
 	if (temp_region != BATT_TEMP_COLD || chg->is_power_changed) {
@@ -5319,7 +5319,7 @@ static int handle_batt_temp_cold(struct smb_charger *chg)
 /* -3C <= Tbatt <= 0C */
 static int handle_batt_temp_little_cold(struct smb_charger *chg)
 {
-	temp_region_type temp_region;
+	enum temp_region_type temp_region;
 
 	if (chg->chg_ovp)
 		return 0;
@@ -5357,7 +5357,7 @@ static int handle_batt_temp_little_cold(struct smb_charger *chg)
 /* 0C < Tbatt <= 5C*/
 static int handle_batt_temp_cool(struct smb_charger *chg)
 {
-	temp_region_type temp_region;
+	enum temp_region_type temp_region;
 
 	if (chg->chg_ovp)
 		return 0;
@@ -5440,7 +5440,7 @@ static int handle_batt_temp_little_cool(struct smb_charger *chg)
 /* 12C < Tbatt < 22C */
 static int handle_batt_temp_prenormal(struct smb_charger *chg)
 {
-	temp_region_type temp_region;
+	enum temp_region_type temp_region;
 
 	if (chg->chg_ovp)
 		return 0;
@@ -5478,7 +5478,7 @@ static int handle_batt_temp_prenormal(struct smb_charger *chg)
 /* 15C < Tbatt < 45C */
 static int handle_batt_temp_normal(struct smb_charger *chg)
 {
-	temp_region_type temp_region;
+	enum temp_region_type temp_region;
 
 	if (chg->chg_ovp)
 		return 0;
@@ -5516,7 +5516,7 @@ static int handle_batt_temp_normal(struct smb_charger *chg)
 /* 45C <= Tbatt <= 55C */
 static int handle_batt_temp_warm(struct smb_charger *chg)
 {
-	temp_region_type temp_region;
+	enum temp_region_type temp_region;
 
 	if (chg->chg_ovp)
 		return 0;
@@ -5554,7 +5554,7 @@ static int handle_batt_temp_warm(struct smb_charger *chg)
 /* 55C < Tbatt */
 static int handle_batt_temp_hot(struct smb_charger *chg)
 {
-	temp_region_type temp_region;
+	enum temp_region_type temp_region;
 
 	temp_region = op_battery_temp_region_get(chg);
 	if ((temp_region != BATT_TEMP_HOT)
@@ -6043,7 +6043,7 @@ static void op_heartbeat_work(struct work_struct *work)
 	struct delayed_work *dwork = to_delayed_work(work);
 	struct smb_charger *chg = container_of(dwork,
 			struct smb_charger, heartbeat_work);
-	temp_region_type temp_region;
+	enum temp_region_type temp_region;
 	bool charger_present;
 	bool fast_charging;
 	static int batt_temp = 0, vbat_mv = 0;
@@ -6318,7 +6318,7 @@ int get_prop_chg_protect_status(struct smb_charger *chg)
 {
 	int temp, rc;
 	bool batt_present;
-	temp_region_type temp_region;
+	enum temp_region_type temp_region;
 	union power_supply_propval vbus_val;
 
 	if (chg->use_fake_protect_sts)

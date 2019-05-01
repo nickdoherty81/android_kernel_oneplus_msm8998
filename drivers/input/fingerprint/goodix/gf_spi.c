@@ -41,9 +41,7 @@
 #include <linux/pm_qos.h>
 #include <linux/cpufreq.h>
 #include <linux/wakelock.h>
-/*#ifdef AMARTINZ_KILLZ_IT
 #include <linux/oneplus/boot_mode.h>
-#endif*/
 #include "gf_spi.h"
 
 #if defined(USE_SPI_BUS)
@@ -89,7 +87,6 @@ struct gf_key_map maps[] = {
 	{ EV_KEY, GF_NAV_INPUT_RIGHT },
 	{ EV_KEY, GF_NAV_INPUT_LEFT },
 	{ EV_KEY, GF_NAV_INPUT_LONG_PRESS },
-/*liuyan 2017/8/4, add*/
 	{ EV_KEY, GF_NAV_INPUT_F2},
 #endif
 };
@@ -302,7 +299,6 @@ static void nav_event_input(struct gf_dev *gf_dev, gf_nav_event_t nav_event)
 		nav_input = GF_NAV_INPUT_DOUBLE_CLICK;
 		pr_debug("%s nav double click\n", __func__);
 		break;
-/*liuyan 2017/8/7 add for reprot f2*/
 	case GF_NAV_F2:
 		nav_input = GF_NAV_INPUT_F2;
 		pr_debug("%s nav f2\n", __func__);
@@ -595,38 +591,6 @@ static const struct file_operations gf_fops = {
 #endif
 };
 
-static ssize_t proximity_state_set(struct device *dev,
-	struct device_attribute *attr, const char *buf, size_t count)
-{
-	struct gf_dev *gf_dev = dev_get_drvdata(dev);
-	int rc, val;
-
-	rc = kstrtoint(buf, 10, &val);
-	if (rc)
-		return -EINVAL;
-
-	gf_dev->proximity_state = !!val;
-
-	if (gf_dev->proximity_state) {
-		gf_disable_irq(gf_dev);
-	} else {
-		gf_enable_irq(gf_dev);
-	}
-
-	return count;
-}
-
-static DEVICE_ATTR(proximity_state, S_IWUSR, NULL, proximity_state_set);
-
-static struct attribute *attributes[] = {
-	&dev_attr_proximity_state.attr,
-	NULL
-};
-
-static const struct attribute_group attribute_group = {
-	.attrs = attributes,
-};
-
 static int goodix_fb_state_chg_callback(struct notifier_block *nb,
 		unsigned long val, void *data)
 {
@@ -689,7 +653,6 @@ static int gf_probe(struct platform_device *pdev)
 #endif
 {
 	struct gf_dev *gf_dev = &gf;
-	struct device *dev = &pdev->dev;
 	int status = -EINVAL;
 	unsigned long minor;
 	int i;
@@ -741,16 +704,13 @@ static int gf_probe(struct platform_device *pdev)
 		status = gf_pinctrl_init(gf_dev);
 		if (status)
 			goto error_hw;
-		/*#ifdef AMARTINZ_KILLZ_IT
 		if (get_boot_mode() !=  MSM_BOOT_MODE__FACTORY) {
-		#endif*/
 			status = pinctrl_select_state(gf_dev->gf_pinctrl,
 				gf_dev->gpio_state_enable);
 			if (status) {
 				pr_err("can not set %s pins\n", "fp_en_init");
 				goto error_hw;
 			}
-		/*#ifdef AMARTINZ_KILLZ_IT
 		} else {
 			status = pinctrl_select_state(gf_dev->gf_pinctrl,
 				gf_dev->gpio_state_disable);
@@ -759,7 +719,6 @@ static int gf_probe(struct platform_device *pdev)
 				goto error_hw;
 			}
 		}
-		#endif*/
 	}
 	if (status == 0) {
 		/*input device subsystem */
@@ -809,14 +768,6 @@ static int gf_probe(struct platform_device *pdev)
 	gf_dev->irq_enabled = 1;
 	gf_disable_irq(gf_dev);
 	gpio_set_value(gf_dev->reset_gpio, 0);
-
-	dev_set_drvdata(dev, gf_dev);
-
-	status = sysfs_create_group(&dev->kobj, &attribute_group);
-	if (status) {
-		dev_err(dev, "could not create sysfs\n");
-		goto err_irq;
-	}
 
 	pr_info("version V%d.%d.%02d\n", VER_MAJOR, VER_MINOR, PATCH_LEVEL);
 

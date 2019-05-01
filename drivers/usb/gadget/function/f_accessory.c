@@ -887,10 +887,8 @@ int acc_ctrlrequest(struct usb_composite_dev *cdev,
 	u16	w_length = le16_to_cpu(ctrl->wLength);
 	unsigned long flags;
 
-#ifdef CONFIG_VENDOR_ONEPLUS
 	if (dev == NULL)
 		goto err;
-#endif
 
 /*
  *	printk(KERN_INFO "acc_ctrlrequest "
